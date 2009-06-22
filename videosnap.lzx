@@ -1,0 +1,134 @@
+<!--- avrecorder
+
+-->
+<library>
+<class name="videosnap" width="400" height="300" bgcolor="silver">
+  <!-- PUBLIC ATTRIBUTES -->
+  <!--- spew out messages to the OpenLaszlo debugger when in debug mode -->
+  <attribute name="debug" value="true" type="boolean"/> 
+  <!--- the URL to the rtmp "application" default: rtmp://localhost/test 
+      @keywords final--> 
+  <attribute name="rtmp_url" value="rtmp://localhost/test" type="string"/>
+
+  <!--- the name for the rtmp stream, typically this will be the filename
+        where the recorded video is save (without the .flv file extension -->
+  <attribute name="streamname" value="recorded_video" type="string"/>
+
+  <!--- "record" or "playback" -->
+  <attribute name="mode" value="record" type="string"/>
+
+  <!--- the size of the border in pixels, set color with bgcolor -->
+  <attribute name="bordersize" value="2" type="number"/>
+
+  <!--- the resolution of the video recorded by the camera -->
+  <attribute name="camera_width" value="400" type="number"/>
+   
+  <!--- the resolution of the video recorded by the camera -->
+  <attribute name="camera_height" value="300" type="number"/>
+
+  <!--- the number of frames per second for camera capture -->
+  <attribute name="camera_fps" value="30" type="number"/>
+
+  <!--- a value (0..1) which represents the image capture quality
+        where 1 is the highest, set as 0 to indicate that you
+        want the bandwidth setting to be observed instead -->
+  <attribute name="camera_picturequality" value=".8" type="number"/>
+
+  <!--- the number of bytes per second that you want the recorded
+        stream to be when it plays back. Set as 0 to indicate that 
+        variable bandwith is ok and the picturequality setting
+        will be observed instead -->
+  <attribute name="camera_bandwidth" value="0" type="number"/>
+
+  <!-- CLASS IMPLEMENTATION -->
+  <rtmpconnection autoconnect="true" debug="${classroot.debug}"
+          src="$once{parent.rtmp_url}">
+      <handler name="onconstruct">
+          Debug.write('setting classroot.rtmpc = ' + this);
+          classroot.rtmpc = this;
+      </handler>
+  </rtmpconnection>
+
+  <view name="content" 
+        x="${classroot.bordersize}"
+        y="${classroot.bordersize}"
+        width="${classroot.width - 2 * classroot.bordersize}"
+        height="${classroot.height - 2 * classroot.bordersize}"
+        >
+    <view name="recordView" visible="${classroot.mode == 'record'}"
+        width="100%" height="100%">
+
+          <videoview name="video" debug="${classroot.debug}"
+                  height="100%" width="100%">
+
+              <camera show="true" 
+                      debug="${classroot.debug}" 
+                      width="${classroot.camera_width}"
+                      height="${classroot.camera_height}"
+                      fps="${classroot.camera_fps}" 
+                      picturequality="${classroot.camera_picturequality}" 
+                      bandwidth="${classroot.camera_bandwidth}">
+                  <handler name="onconstruct">
+                      classroot.cam = this;
+                  </handler>
+              </camera>
+              <!-- TODO: parameterized mic attributes -->
+              <microphone  
+                      debug="${classroot.debug}" 
+                      capturing="true">
+                  <handler name="onconstruct">
+                      classroot.mic = this;
+                  </handler>
+              </microphone>
+              <mediastream type="rtmp"
+                      rtmp="${classroot.rtmpc}"
+                      debug="${classroot.debug}" 
+                      url="${classroot.streamname}">
+                  <handler name="onconstruct">
+                      classroot.stream = this;
+                  </handler>
+              </mediastream>
+          </videoview>
+
+          <text y="${parent.height-this.height}" fgcolor="0xeaeaea"
+                text="${'time: ' + classroot.stream.time}" />
+
+          <button align="center" y="${parent.parent.height*3/4}"
+              visible="false">
+              <attribute name="text" value="${classroot.stream.mode == 'recording' ? 
+                  'Stop Recording' : 'Start Recording'}"/>
+
+              <handler name="onallowed" reference="classroot.cam">
+                  Debug.write('onallowed', classroot.cam);
+                  this.setVisible(true);
+              </handler>
+              <handler name="onclick">
+                  if (classroot.stream.mode == "") {    // need to start recording
+                      classroot.stream.record();
+                  } else {
+                      classroot.stream.stop();
+                      classroot.setAttribute('mode', 'playback');
+                      classroot.playVideo(classroot.streamname);
+                  }
+              </handler>
+          </button>
+    </view>
+    <videoplayer id="gPlayer" url="video.flv" type="rtmp" 
+            visible="${classroot.mode == 'playback'}"
+            width="100%" height="100%"/>
+        
+    <!-- TODO: Needs to be way more subtle, this is really just for debugging,
+        although it is good user feedback if they are having network issues -->
+    <view valign="top" layout="axis:y;spacing:5">
+        <rtmpstatus rtmpc="${classroot.rtmpc}"/>
+        <!-- TODO: better to show status on rollover or something -->
+        <text text="${classroot.rtmpc.status}" />
+    </view>
+  </view>
+  <!--- play a recorded video with the given streamname -->
+  <method name="playVideo" args="streamname">
+      Debug.write('need to write code here');
+      gPlayer.playVideo(streamname + '.flv', 'rtmp');
+  </method>
+</class>
+</library>

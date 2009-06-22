@@ -1,0 +1,6 @@
+<canvas>
+  <include href="videosnap.lzx"/>
+  <simplelayout spacing="4"/>
+  <text><![CDATA[<videosnap id="gRecorder" x="20"/>]]></text>
+  <videosnap id="gRecorder"  x="20"/>
+</canvas>
