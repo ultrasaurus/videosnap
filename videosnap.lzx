@@ -45,12 +45,12 @@
   <attribute name="camera_height" value="300" type="number"/>
 
   <!--- the number of frames per second for camera capture -->
-  <attribute name="camera_fps" value="30" type="number"/>
+  <attribute name="camera_fps" value="15" type="number"/>
 
   <!--- a value (0..1) which represents the image capture quality
         where 1 is the highest, set as 0 to indicate that you
         want the bandwidth setting to be observed instead -->
-  <attribute name="camera_picturequality" value=".8" type="number"/>
+  <attribute name="camera_picturequality" value="1" type="number"/>
 
   <!--- the number of bytes per second that you want the recorded
         stream to be when it plays back. Set as 0 to indicate that 
@@ -118,12 +118,14 @@
 
               <handler name="onallowed" reference="classroot.cam">
                   Debug.write('onallowed', classroot.cam);
-                  this.setVisible(true);
+                  this.setAttribute('visible', true);
               </handler>
               <handler name="onclick">
                   if (classroot.stream.mode == "") {    // need to start recording
                       classroot.stream.record();
                   } else {
+                      Debug.write("------- stop -------");
+                      Debug.write("stream=%w, streamname=%w",classroot.stream, classroot.streamname);
                       classroot.stream.stop();
                       classroot.setAttribute('mode', 'playback');
                       classroot.playVideo(classroot.streamname);
@@ -145,8 +147,8 @@
   </view>
   <!--- play a recorded video with the given streamname -->
   <method name="playVideo" args="streamname">
-      Debug.write('need to write code here');
       gPlayer.playVideo(streamname + '.flv', 'rtmp');
   </method>
+  
 </class>
 </library>

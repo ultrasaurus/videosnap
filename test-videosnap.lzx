@@ -1,6 +1,31 @@
 <canvas>
   <include href="videosnap.lzx"/>
-  <simplelayout spacing="4"/>
+
+  <class name="labelEdit" layout="axis:y">
+    <attribute name="label" value="" type="string"/>
+    <attribute name="text" value="" type="string"/>
+    <text text="${parent.label}"/>
+    <edittext text="${parent.text}">
+      <handler name="ontext">
+        parent.setAttribute('text', this.text);
+      </handler>
+    </edittext>
+  </class>
+
+
+  <simplelayout spacing="10"/>
+  <constantlayout axis="x" value="20"/>
+
+
+
   <text><![CDATA[<videosnap id="gRecorder" x="20"/>]]></text>
-  <videosnap id="gRecorder"  x="20"/>
+  <videosnap id="gRecorder"  streamname="${gStreamName.text}"/>
+  <labelEdit id="gStreamName"
+             label="Stream name: (file will be called name.flv)"
+             text="file1"/>
+  <button onclick="gRecorder.setAttribute('mode', 'record')">Record Again</button>
+  <view>
+
+
+  </view>
 </canvas>
